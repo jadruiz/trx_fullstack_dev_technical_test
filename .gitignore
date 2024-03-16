@@ -1,6 +1,6 @@
 # Dependencias
-/node_modules
-/frontend/node_modules
+/node_modules/
+backend/node_modules/
 
 # Carpetas de construcción
 /build
@@ -27,6 +27,9 @@ yarn-error.log*
 # Sistema de archivos del SO
 .DS_Store
 Thumbs.db
+*.log
+*.tmp
+*.temp
 
 # Carpetas de cobertura
 /coverage
