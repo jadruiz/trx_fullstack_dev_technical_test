@@ -85,6 +85,7 @@ exports.createVehicle = async (req, res, next) => {
       color,
     });
     const savedVehicle = await newVehicle.save();
+    req.io.emit("vehicleCreated", savedVehicle);
     res.status(201).json(savedVehicle);
   } catch (error) {
     next(error);
@@ -142,6 +143,7 @@ exports.updateVehicle = async (req, res, next) => {
       { new: true }
     );
     if (updatedVehicle) {
+      req.io.emit("vehicleUpdated", updatedVehicle);
       res.status(200).json(updatedVehicle);
     } else {
       res.status(404).json({ message: "Vehículo no encontrado" });
@@ -156,6 +158,7 @@ exports.deleteVehicle = async (req, res, next) => {
   try {
     const deletedVehicle = await Vehicle.findByIdAndDelete(req.params.id);
     if (deletedVehicle) {
+      req.io.emit("vehicleDeleted", { id: req.params.id });
       res.status(200).json({ message: "Vehículo eliminado" });
     } else {
       res.status(404).json({ message: "Vehículo no encontrado" });
