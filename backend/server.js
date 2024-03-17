@@ -1,12 +1,15 @@
 const express = require("express");
-const mongoose = require("mongoose");
+const http = require("http");
+const socketIo = require("socket.io");
 const bodyParser = require("body-parser");
-require("dotenv").config();
-
 const errorHandler = require("./api/middlewares/errorHandler");
 const vehicleRoutes = require("./api/routes/vehicleRoutes");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 
 app.use(bodyParser.json());
 
@@ -19,7 +22,26 @@ app.use("/api/vehicles", vehicleRoutes);
 
 app.use(errorHandler);
 
+// Emitir eventos de actualización y eliminación cuando sea necesario
+io.on("connection", (socket) => {
+  console.log("Client connected");
+
+  socket.on("updateVehicle", async (vehicleId, updatedData) => {
+    await updateVehicle(vehicleId, updatedData);
+    io.emit("vehicleUpdated", { vehicleId, updatedData });
+  });
+
+  socket.on("deleteVehicle", async (vehicleId) => {
+    await deleteVehicle(vehicleId);
+    io.emit("vehicleDeleted", vehicleId);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
+});
+
 const PORT = process.env.PORT || 9000;
-app.listen(PORT, () => {
-  console.log(`Server working on port ${PORT}!`);
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
