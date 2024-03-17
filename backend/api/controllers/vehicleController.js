@@ -1,12 +1,25 @@
 const Vehicle = require("../models/vehicleModel");
 
 // Obtener todos los veículos
-exports.getAllVehicles = async (req, res, next) => {
+exports.getAllVehicles = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 10;
+
   try {
-    const vehicles = await Vehicle.find();
-    res.json(vehicles);
+    const totalVehicles = await Vehicle.countDocuments();
+    const totalPages = Math.ceil(totalVehicles / pageSize);
+
+    const vehicles = await Vehicle.find()
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
+
+    res.json({
+      vehicles,
+      totalPages,
+      currentPage: page,
+    });
   } catch (err) {
-    next(err);
+    res.status(500).send({ message: err.message });
   }
 };
 
@@ -153,12 +166,15 @@ exports.deleteVehicle = async (req, res, next) => {
 };
 
 // Buscar un vehículos
-exports.searchVehicles = async (req, res) => {
+exports.searchVehicles = async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 10;
+  const keyword = req.query.keyword;
+
   try {
-    const keyword = req.query.keyword;
-    let vehicles;
+    let query = {};
     if (keyword) {
-      vehicles = await Vehicle.find({
+      query = {
         $or: [
           { placa: { $regex: new RegExp(keyword, "i") } },
           { numeroEconomico: { $regex: new RegExp(keyword, "i") } },
@@ -168,12 +184,20 @@ exports.searchVehicles = async (req, res) => {
           { modelo: { $regex: new RegExp(keyword, "i") } },
           { color: { $regex: new RegExp(keyword, "i") } },
         ],
-      });
-    } else {
-      vehicles = await Vehicle.find();
+      };
     }
-    res.json(vehicles);
-  } catch (err) {
-    res.status(500).send({ message: err.message });
+    const totalVehicles = await Vehicle.countDocuments(query);
+    const totalPages = Math.ceil(totalVehicles / pageSize);
+    const vehicles = await Vehicle.find(query)
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
+
+    res.json({
+      vehicles,
+      totalPages,
+      currentPage: page,
+    });
+  } catch (error) {
+    next(error);
   }
 };
