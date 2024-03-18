@@ -4,7 +4,9 @@ const http = require("http");
 const socketIo = require("socket.io");
 const bodyParser = require("body-parser");
 const errorHandler = require("./api/middlewares/errorHandler");
+const { authenticateToken } = require("./api/middlewares/authMiddleware");
 const vehicleRoutes = require("./api/routes/vehicleRoutes");
+const routeRoutes = require("./api/routes/routeRoutes");
 const mongoose = require("mongoose");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
@@ -56,7 +58,8 @@ mongoose
   .catch((err) => console.log("Error connection to MongoDB", err));
 
 // Rutas
-app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/vehicles", authenticateToken, vehicleRoutes);
+app.use("/api/routes", routeRoutes);
 
 // Middleware de manejo de errores
 app.use(errorHandler);
@@ -81,6 +84,11 @@ process.on("SIGINT", async () => {
 
 // Inicio del servidor
 const PORT = process.env.PORT || 9000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== "test") {
+  //Evitar la Ejecución de server.listen() en Pruebas
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+module.exports = { app, server };
