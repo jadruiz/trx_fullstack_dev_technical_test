@@ -6,18 +6,10 @@ import React, {
   useEffect,
 } from "react";
 import { Vehicle } from "../../src/types/vehicle";
+import { VehicleContextType } from "../../src/types/VehicleContextTypes";
+import { API_URL, JWT_TOKEN } from "../../src/config";
 
-type VehicleContextType = {
-  vehicles: Vehicle[];
-  selectedVehicleId: string | null;
-  setSelectedVehicleId: (id: string | null) => void;
-  setVehicles: React.Dispatch<React.SetStateAction<Vehicle[]>>;
-  updateVehicles: (updatedVehicles: Vehicle[]) => void;
-  deleteVehicle: (vehicleId: string) => void;
-  totalPages: number; // Número total de páginas
-  currentPage: number; // Página actual
-  searchVehicles: (keyword: string, page: number, pageSize: number) => void; // Función para buscar vehículos
-};
+console.log("apiu:", API_URL);
 
 const VehicleContext = createContext<VehicleContextType | undefined>(undefined);
 
@@ -31,25 +23,19 @@ export const VehicleProvider: React.FC<{ children: ReactNode }> = ({
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(
     null
   );
-  const token =
-    "eyJhbGciOiJIUzI1NiJ9.e30.LWjhAsQBfZsc8486nmm5_NuxblMktku4Yo1foc2Mlwo";
   const baseHeaders = {
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${JWT_TOKEN}`,
     Accept: "application/json",
     "Content-Type": "application/json",
   };
-
   useEffect(() => {
     const fetchInitialVehicles = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3001/api/vehicles/?page=1&pageSize=10",
-          {
-            method: "GET",
-            headers: baseHeaders,
-            redirect: "follow",
-          }
-        );
+        const response = await fetch(`${API_URL}vehicles/?page=1&pageSize=10`, {
+          method: "GET",
+          headers: baseHeaders,
+          redirect: "follow",
+        });
         if (!response.ok) {
           throw new Error(`Error fetching vehicles: ${response.statusText}`);
         }
@@ -64,9 +50,7 @@ export const VehicleProvider: React.FC<{ children: ReactNode }> = ({
     };
     const fetchRoute = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3001/api/routes/route-detail"
-        );
+        const response = await fetch(`${API_URL}routes/route-detail`);
         if (!response.ok) {
           throw new Error("Error fetching route");
         }
@@ -87,7 +71,7 @@ export const VehicleProvider: React.FC<{ children: ReactNode }> = ({
   ) => {
     try {
       const response = await fetch(
-        `http://localhost:3001/api/vehicles/search?keyword=${keyword}&page=${page}&pageSize=${pageSize}`,
+        `${API_URL}vehicles/search?keyword=${keyword}&page=${page}&pageSize=${pageSize}`,
         {
           method: "GET",
           headers: {
@@ -112,10 +96,10 @@ export const VehicleProvider: React.FC<{ children: ReactNode }> = ({
 
   const deleteVehicle = async (vehicleId) => {
     try {
-      const response = await fetch(
-        `http://localhost:3001/api/vehicles/${vehicleId}`,
-        { method: "DELETE", headers: baseHeaders }
-      );
+      const response = await fetch(`${API_URL}vehicles/${vehicleId}`, {
+        method: "DELETE",
+        headers: baseHeaders,
+      });
       // Verifica si la eliminación fue exitosa
       if (response.status === 200) {
         // Actualiza el estado local excluyendo el vehículo eliminado
@@ -137,7 +121,7 @@ export const VehicleProvider: React.FC<{ children: ReactNode }> = ({
   const addVehicle = async (newVehicle: Vehicle) => {
     console.log(newVehicle);
     try {
-      const response = await fetch("http://localhost:3001/api/vehicles", {
+      const response = await fetch(`${API_URL}vehicles`, {
         method: "POST",
         headers: baseHeaders,
         body: JSON.stringify(newVehicle),
@@ -159,14 +143,11 @@ export const VehicleProvider: React.FC<{ children: ReactNode }> = ({
 
   const updateVehicle = async (vehicleId, updatedVehicleData) => {
     try {
-      const response = await fetch(
-        `http://localhost:3001/api/vehicles/${vehicleId}`,
-        {
-          method: "PUT",
-          headers: baseHeaders,
-          body: JSON.stringify(updatedVehicleData),
-        }
-      );
+      const response = await fetch(`${API_URL}vehicles/${vehicleId}`, {
+        method: "PUT",
+        headers: baseHeaders,
+        body: JSON.stringify(updatedVehicleData),
+      });
       if (response.status === 200) {
         const updatedVehicle = await response.json();
         setVehicles((prevVehicles) =>
