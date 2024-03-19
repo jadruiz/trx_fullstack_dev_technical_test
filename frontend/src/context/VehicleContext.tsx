@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
-// Suponiendo que ya tienes definido este tipo en algún lugar
 type Vehicle = {
   _id: string;
   placa: string;
@@ -18,46 +17,76 @@ type Vehicle = {
 type VehicleContextType = {
   vehicles: Vehicle[];
   setVehicles: React.Dispatch<React.SetStateAction<Vehicle[]>>;
-  // Aquí podrías añadir cualquier otra función para manejar los vehículos, como addVehicle, deleteVehicle, etc.
+  updateVehicles: (updatedVehicles: Vehicle[]) => void; // Función para actualizar la lista de vehículos
+  totalPages: number; // Número total de páginas
+  currentPage: number; // Página actual
+  searchVehicles: (keyword: string, page: number, pageSize: number) => void; // Función para buscar vehículos
 };
 
 const VehicleContext = createContext<VehicleContextType | undefined>(undefined);
 
-export const VehicleProvider: React.FC<{children: ReactNode}> = ({ children }) => {
+export const VehicleProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const token = 'eyJhbGciOiJIUzI1NiJ9.e30.LWjhAsQBfZsc8486nmm5_NuxblMktku4Yo1foc2Mlwo';
 
-  // Simula la carga de datos desde una API o fuente externa
   useEffect(() => {
-    const fetchVehicles = async () => {
-      // Aquí iría la lógica para cargar los datos, por ejemplo, usando fetch() o axios.
-      // Por simplicidad, vamos a simular con datos estáticos:
-      const loadedVehicles: Vehicle[] = [
-        // Aquí incluirías los vehículos cargados
-        // Ejemplo:
-        {
-          _id: "65f5dc7c48ab62f7be76f140",
-          placa: "3771695627",
-          numeroEconomico: "6980379542",
-          vin: "WBA8Z5C5XFG644485",
-          asientos: 39,
-          seguro: "Fisher-Rice",
-          numeroSeguro: "3238367366",
-          marca: "Volvo",
-          modelo: "960",
-          anio: 1994,
-          color: "Teal",
-        },
-        // Agrega más vehículos según sea necesario
-      ];
+    const fetchInitialVehicles = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/api/vehicles/?page=2&pageSize=4', {
+          method: "GET",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          redirect: "follow"
+        });
+        if (!response.ok) {
+          throw new Error(`Error fetching vehicles: ${response.statusText}`);
+        }
+        const data = await response.json();
 
-      setVehicles(loadedVehicles);
+        setVehicles(data.vehicles);
+        setTotalPages(data.totalPages);
+        setCurrentPage(data.currentPage);
+      } catch (error) {
+        console.error('Failed to fetch initial vehicles', error);
+      }
     };
+    fetchInitialVehicles();
 
-    fetchVehicles();
   }, []);
 
+  const searchVehicles = async (keyword: string, page: number, pageSize: number) => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/vehicles/search?keyword=${keyword}&page=${page}&pageSize=${pageSize}`, {
+        method: "GET",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        redirect: "follow"
+      });
+      if (!response.ok) {
+        throw new Error(`Error searching vehicles: ${response.statusText}`);
+      }
+      const data = await response.json();
+      setVehicles(data.vehicles);
+      setTotalPages(data.totalPages);
+      setCurrentPage(data.currentPage);
+    } catch (error) {
+      console.error('Failed to search vehicles', error);
+    }
+  };
+  const updateVehicles = (updatedVehicles: Vehicle[]) => {
+    setVehicles(updatedVehicles);
+  };
+
   return (
-    <VehicleContext.Provider value={{ vehicles, setVehicles }}>
+    <VehicleContext.Provider value={{ vehicles, setVehicles, updateVehicles, totalPages, currentPage, searchVehicles }}>
       {children}
     </VehicleContext.Provider>
   );

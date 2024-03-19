@@ -1,10 +1,10 @@
 import React from 'react';
 import { useVehicles } from '../../context/VehicleContext'; // Asegúrate de que la ruta de importación es correcta
 import VehicleItem from '../Vehicle/VehicleItem';
+import './VehicleList.css';
 
 const VehicleList = () => {
   const { vehicles } = useVehicles();
-
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold mb-4">Listado de Vehículos</h2>
