@@ -10,5 +10,7 @@ export interface Vehicle {
     modelo: string;
     anio: number;
     color: string;
+    latitud: string;
+    longitud: string;
   }
   
