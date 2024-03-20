@@ -1,17 +1,34 @@
-import React, { useState } from "react";
-import { useVehicles } from "../../context/VehicleContext"; // Ajusta la importación según tu estructura de carpetas
+import React, { useState, FormEvent } from "react";
+import { useVehicles } from "../../context/VehicleContext";
 import Modal from "../Modal";
 import VehicleForm from "../Vehicle/VehicleForm";
+import { Vehicle } from "../../types/vehicle"; // Asegúrate de que este tipo esté correctamente definido
 
-const AddVehicleModal = () => {
+interface VehicleFormValues {
+  _id?: string;
+  placa: string;
+  numeroEconomico: string;
+  vin: string;
+  asientos: number;
+  seguro: string;
+  numeroSeguro: string;
+  marca: string;
+  modelo: string;
+  anio: number;
+  color: string;
+  //latitud: string; longitud: string;
+}
+
+const AddVehicleModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { addVehicle } = useVehicles(); // Usando el hook para acceder a la función addVehicle del contexto
+  const { addVehicle } = useVehicles();
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
 
-  const handleFormSubmit = async (vehicle) => {
-    await addVehicle(vehicle);
+  const handleFormSubmit = async (e: FormEvent, vehicle: VehicleFormValues) => {
+    e.preventDefault();
+    await addVehicle(vehicle as Vehicle);
     handleClose();
   };
 
@@ -34,7 +51,6 @@ const AddVehicleModal = () => {
             <VehicleForm onSubmit={handleFormSubmit} />
             <div className="flex justify-end p-4 border-t">
               <button
-                type="button"
                 onClick={handleClose}
                 className="mr-2 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
@@ -42,7 +58,6 @@ const AddVehicleModal = () => {
               </button>
               <button
                 type="submit"
-                form="vehicleForm"
                 className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Agregar Vehículo

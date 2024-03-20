@@ -1,5 +1,7 @@
 import { Vehicle } from "./vehicle";
 
+type RouteType = any;
+
 export type VehicleContextType = {
   vehicles: Vehicle[];
   selectedVehicleId: string | null;
@@ -10,4 +12,6 @@ export type VehicleContextType = {
   totalPages: number;
   currentPage: number;
   searchVehicles: (keyword: string, page: number, pageSize: number) => void;
+  route?: RouteType;
+  addVehicle: (vehicle: Vehicle) => Promise<void>;
 };

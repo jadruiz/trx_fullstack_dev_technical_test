@@ -9,8 +9,6 @@ import { Vehicle } from "../../src/types/vehicle";
 import { VehicleContextType } from "../../src/types/VehicleContextTypes";
 import { API_URL, JWT_TOKEN } from "../../src/config";
 
-console.log("apiu:", API_URL);
-
 const VehicleContext = createContext<VehicleContextType | undefined>(undefined);
 
 export const VehicleProvider: React.FC<{ children: ReactNode }> = ({
@@ -74,11 +72,7 @@ export const VehicleProvider: React.FC<{ children: ReactNode }> = ({
         `${API_URL}vehicles/search?keyword=${keyword}&page=${page}&pageSize=${pageSize}`,
         {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
+          headers: baseHeaders,
           redirect: "follow",
         }
       );

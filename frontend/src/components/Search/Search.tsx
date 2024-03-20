@@ -1,24 +1,25 @@
-import React, { useState } from 'react';
-import { useVehicles } from '../../context/VehicleContext';
-import AddVehicleModal from '../Vehicle/AddVehicleModal';
+import React, { ChangeEvent, KeyboardEvent, useState } from "react";
+import { useVehicles } from "../../context/VehicleContext";
+import AddVehicleModal from "../Vehicle/AddVehicleModal";
 
-const Search = () => {
+const Search: React.FC = () => {
   const { searchVehicles } = useVehicles();
-  const [keyword, setKeyword] = useState('');
-  const [isAddVehicleModalOpen, setIsAddVehicleModalOpen] = useState(false); 
+  const [keyword, setKeyword] = useState<string>("");
+  const [isAddVehicleModalOpen, setIsAddVehicleModalOpen] =
+    useState<boolean>(false);
 
   const handleSearch = async () => {
     if (keyword.length >= 3) {
-      await searchVehicles(keyword);
+      await searchVehicles(keyword, 1 /* página */, 10 /* tamaño de página */);
     }
   };
 
-  const handleChange = (event) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setKeyword(event.target.value);
   };
 
-  const handleKeyPress = (event) => {
-    if (event.key === 'Enter' && keyword.length >= 3) {
+  const handleKeyPress = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && keyword.length >= 3) {
       handleSearch();
     }
   };
@@ -41,10 +42,16 @@ const Search = () => {
         onKeyPress={handleKeyPress}
         className="w-full px-4 py-2 border border-gray-300 rounded-md"
       />
-      <button onClick={handleSearch} className="px-4 py-2 bg-blue-500 text-white rounded-md">
+      <button
+        onClick={handleSearch}
+        className="px-4 py-2 bg-blue-500 text-white rounded-md"
+      >
         Buscar
       </button>
-      <AddVehicleModal isOpen={isAddVehicleModalOpen} onClose={handleCloseAddVehicleModal} />
+      <AddVehicleModal
+        isOpen={isAddVehicleModalOpen}
+        onClose={handleCloseAddVehicleModal}
+      />
     </div>
   );
 };
